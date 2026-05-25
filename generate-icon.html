@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Generate App Icon</title>
+  <style>
+    body { background: #1a1a1a; color: #fff; font-family: sans-serif; padding: 32px; }
+    canvas { border-radius: 16px; }
+    button { margin-top: 20px; padding: 12px 24px; background: #AAFF00; color: #0A0A0A; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem; }
+    p { margin-top: 12px; color: #888; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <h2>Documento.fun Icon Generator</h2>
+  <canvas id="icon" width="1024" height="1024"></canvas>
+  <br />
+  <button onclick="downloadIcon()">Download Icon PNG</button>
+  <p>After downloading, place the file at:<br />
+    android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png<br />
+    android/app/src/main/res/mipmap-hdpi/ic_launcher.png<br />
+    android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+  </p>
+
+  <script>
+    const canvas = document.getElementById('icon');
+    const ctx = canvas.getContext('2d');
+
+    // Background
+    ctx.fillStyle = '#AAFF00';
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 1024, 1024, 120);
+    ctx.fill();
+
+    // Letter D
+    ctx.fillStyle = '#0A0A0A';
+    ctx.font = 'bold 620px Inter, Arial, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('D', 512, 540);
+
+    function downloadIcon() {
+      const link = document.createElement('a');
+      link.download = 'ic_launcher.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
