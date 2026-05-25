@@ -2,1239 +2,907 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>documento.fun — All-in-One Document Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0A0A0A" />
+  <title>documento.fun — Sign, Collaborate, Ship</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #0A0A0A;
+      --bg2: #111111;
       --accent: #AAFF00;
       --text: #FFFFFF;
-      --muted: #888888;
-      --radius-card: 12px;
-      --radius-btn: 999px;
+      --muted: #666666;
+      --border: rgba(255,255,255,0.07);
+      --r: 14px;
+      --rb: 999px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* SCROLL PROGRESS */
-    #scroll-progress {
-      position: fixed;
-      top: 0; left: 0;
-      width: 0%;
-      height: 3px;
+    #bar {
+      position: fixed; top: 0; left: 0;
+      height: 2px; width: 0%;
       background: var(--accent);
-      z-index: 10000;
-      transition: width 0.1s linear;
+      z-index: 9999;
+      transition: width 0.08s linear;
     }
 
-    /* CURSOR GLOW — desktop only */
-    #cursor-glow {
-      position: fixed;
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(170,255,0,0.07) 0%, transparent 70%);
-      pointer-events: none;
-      transform: translate(-50%, -50%);
-      z-index: 9990;
-      transition: opacity 0.3s;
-    }
-    @media (hover: none) { #cursor-glow { display: none; } }
-
-    /* NAVBAR */
+    /* NAV */
     nav {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 18px 40px;
-      transition: background 0.3s, backdrop-filter 0.3s;
+      position: sticky; top: 0; z-index: 900;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+      transition: background 0.4s;
     }
-    nav.scrolled {
-      background: rgba(10,10,10,0.85);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+    nav.stuck {
+      background: rgba(10,10,10,0.9);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
     }
     .nav-logo {
-      font-weight: 900;
-      font-size: 1.2rem;
-      color: var(--text);
-      text-decoration: none;
-      letter-spacing: -0.5px;
-      flex-shrink: 0;
+      font-size: 1.1rem; font-weight: 900; letter-spacing: -0.5px;
+      color: var(--text); text-decoration: none;
     }
-    .nav-logo span { color: var(--accent); }
-    .nav-links {
-      display: flex;
-      gap: 32px;
-      list-style: none;
-    }
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 0.9rem;
-      font-weight: 500;
+    .nav-logo em { color: var(--accent); font-style: normal; }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .nav-right a.signin {
+      font-size: 0.82rem; font-weight: 600; color: var(--muted);
+      text-decoration: none; padding: 8px 14px;
       transition: color 0.2s;
     }
-    .nav-links a:hover { color: var(--text); }
-    .nav-actions { display: flex; gap: 12px; align-items: center; }
-
-    .btn {
-      padding: 10px 22px;
-      border-radius: var(--radius-btn);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.875rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
+    .nav-right a.signin:hover { color: var(--text); }
+    .nav-right a.cta-nav {
+      font-size: 0.82rem; font-weight: 700;
+      background: var(--accent); color: var(--bg);
+      border-radius: var(--rb); padding: 9px 18px;
       text-decoration: none;
-      display: inline-block;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+      transition: opacity 0.2s, transform 0.15s;
     }
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid rgba(255,255,255,0.15);
-      color: var(--text);
-    }
-    .btn-ghost:hover { border-color: rgba(255,255,255,0.4); }
-    .btn-lime {
-      background: var(--accent);
-      color: var(--bg);
-    }
-    .btn-lime:hover, .btn-lime:active { opacity: 0.88; transform: translateY(-1px); }
+    .nav-right a.cta-nav:active { opacity: 0.85; transform: scale(0.97); }
 
     /* HAMBURGER */
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      cursor: pointer;
-      padding: 8px;
-      z-index: 1100;
-      position: relative;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      background: none;
-      border: none;
+    .hbg {
+      display: none; flex-direction: column; gap: 5px;
+      background: none; border: none; cursor: pointer;
+      padding: 6px; z-index: 1001; position: relative;
     }
-    .hamburger span {
-      width: 24px;
-      height: 2px;
-      background: var(--text);
-      border-radius: 2px;
-      display: block;
-      transition: all 0.3s;
-    }
-    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .hamburger.open span:nth-child(2) { opacity: 0; }
-    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .hbg span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; display: block; transition: all 0.28s; }
+    .hbg.x span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hbg.x span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hbg.x span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    /* MOBILE MENU OVERLAY */
-    #mobile-menu {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(10,10,10,0.97);
-      z-index: 1050;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 28px;
-    }
-    #mobile-menu.open { display: flex; }
-    #mobile-menu a {
-      color: var(--text);
-      text-decoration: none;
-      font-size: 1.4rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      padding: 10px 20px;
-    }
-    #mobile-menu a:active { opacity: 0.7; }
-    #mobile-menu a.accent-link { color: var(--accent); }
-    .menu-close {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 2rem;
-      cursor: pointer;
-      padding: 8px;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+    @media (max-width: 640px) {
+      .nav-right .signin { display: none; }
+      .nav-right .cta-nav { display: none; }
+      .hbg { display: flex; }
     }
 
-    @media (max-width: 768px) {
-      .nav-links, .nav-actions { display: none; }
-      .hamburger { display: flex; }
-      nav { padding: 14px 20px; }
+    /* MOBILE OVERLAY */
+    #mnu {
+      position: fixed; inset: 0; z-index: 980;
+      background: rgba(10,10,10,0.98);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 6px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.28s;
     }
+    #mnu.on { opacity: 1; pointer-events: all; }
+    #mnu a {
+      font-size: 1.6rem; font-weight: 800; color: rgba(255,255,255,0.5);
+      text-decoration: none; padding: 14px 32px; letter-spacing: -0.5px;
+      transition: color 0.2s; width: 100%; text-align: center;
+    }
+    #mnu a:hover, #mnu a:active { color: var(--text); }
+    #mnu a.hi { color: var(--accent); }
+    #mnu .divider { width: 40px; height: 1px; background: var(--border); margin: 12px 0; }
 
     /* HERO */
     .hero {
-      position: relative;
-      min-height: 92vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      min-height: 100svh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
       text-align: center;
-      padding: 80px 24px 60px;
-      overflow: hidden;
+      padding: 48px 24px 64px;
+      position: relative; overflow: hidden;
     }
-    .hero::before {
+
+    /* subtle radial glow */
+    .hero::after {
       content: '';
       position: absolute;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      opacity: 0.35;
+      top: -10%; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 500px;
+      background: radial-gradient(ellipse, rgba(170,255,0,0.06) 0%, transparent 70%);
       pointer-events: none;
-      z-index: 0;
     }
-    .hero-content { position: relative; z-index: 1; max-width: 820px; }
 
-    /* MENTO BADGE */
-    .mento-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: var(--radius-btn);
-      padding: 7px 16px 7px 8px;
-      margin-bottom: 28px;
+    .hero-inner { position: relative; z-index: 1; width: 100%; max-width: 640px; }
+
+    /* SOCIAL BADGES ROW */
+    .badges-row {
+      display: flex; gap: 8px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 32px;
+    }
+    .social-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px 6px 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: var(--rb);
       text-decoration: none;
-      transition: border-color 0.2s, background 0.2s;
+      transition: border-color 0.22s, background 0.22s, transform 0.15s;
+      cursor: pointer;
+    }
+    .social-badge:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
+    .social-badge:active { transform: scale(0.97); }
+    .badge-icon {
+      width: 26px; height: 26px; border-radius: 7px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .badge-icon.x-icon {
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 900; color: #fff;
+      font-family: sans-serif;
+    }
+    .badge-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+    .badge-txt .sup { font-size: 0.58rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); }
+    .badge-txt .main { font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; }
+
+    /* HERO HEADLINE */
+    .hero h1 {
+      font-size: clamp(2.6rem, 11vw, 5rem);
+      font-weight: 900; letter-spacing: -2.5px; line-height: 1.05;
+      margin-bottom: 18px;
+    }
+    .hero h1 .line2 { color: var(--accent); display: block; }
+    .typing-line { min-height: 1.1em; }
+    .typing-line.fade { opacity: 0; transition: opacity 0.3s; }
+
+    .hero-sub {
+      font-size: clamp(0.9rem, 3.5vw, 1.05rem);
+      color: var(--muted); line-height: 1.7;
+      max-width: 400px; margin: 0 auto 36px;
+    }
+
+    /* CTA BUTTONS */
+    .cta-row {
+      display: flex; gap: 10px; justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 26px;
+      border-radius: var(--rb);
+      font-family: inherit; font-size: 0.92rem; font-weight: 700;
+      text-decoration: none; border: none; cursor: pointer;
+      transition: opacity 0.18s, transform 0.15s, box-shadow 0.18s;
       -webkit-tap-highlight-color: transparent;
-    }
-    .mento-badge:hover { border-color: rgba(170,255,0,0.4); background: rgba(170,255,0,0.06); }
-    .mento-badge img {
-      height: 28px;
-      border-radius: 6px;
-      object-fit: cover;
-    }
-    .mento-badge-text {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 1px;
-    }
-    .mento-badge-text .tag {
-      font-size: 0.62rem;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-    .mento-badge-text .name {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--text);
+      touch-action: manipulation;
       white-space: nowrap;
     }
+    .btn:active { transform: scale(0.96); }
 
-    .hero h1 {
-      font-size: clamp(2.6rem, 7vw, 5.5rem);
-      font-weight: 900;
-      line-height: 1.08;
-      letter-spacing: -2px;
-      margin-bottom: 12px;
+    .btn-primary {
+      background: var(--accent); color: var(--bg);
+      box-shadow: 0 0 0 0 rgba(170,255,0,0.3);
     }
-    .typing-wrap {
-      display: block;
-      color: var(--accent);
-      min-height: 1.2em;
-      transition: opacity 0.35s;
-    }
-    .typing-wrap.fade { opacity: 0; }
-    .hero-sub {
-      font-size: 1.05rem;
-      color: var(--muted);
-      max-width: 520px;
-      margin: 0 auto 36px;
-      line-height: 1.65;
-    }
-    .hero-ctas {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 56px;
-    }
-    .hero-ctas .btn { padding: 14px 30px; font-size: 1rem; }
+    .btn-primary:hover { box-shadow: 0 0 32px rgba(170,255,0,0.25); }
+    .btn-primary:active { opacity: 0.88; }
 
-    /* WATCH DEMO BUTTON */
-    .btn-demo {
+    .btn-outline {
       background: transparent;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1.5px solid rgba(255,255,255,0.13);
       color: var(--text);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
     }
-    .btn-demo:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.04); }
-    .play-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .btn-outline:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+
+    .btn-demo { gap: 10px; }
+    .play-dot {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
     }
-    .play-icon::after {
+    .play-dot::after {
       content: '';
-      width: 0;
-      height: 0;
-      border-style: solid;
-      border-width: 6px 0 6px 10px;
-      border-color: transparent transparent transparent #0A0A0A;
+      width: 0; height: 0;
+      border: 5px solid transparent;
+      border-left: 9px solid var(--text);
       margin-left: 2px;
     }
 
-    /* FLOATING MOCKUP */
-    .hero-mockup {
-      position: relative;
-      z-index: 1;
-      width: min(460px, 88vw);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 24px;
-      animation: float 4s ease-in-out infinite;
-      backdrop-filter: blur(12px);
+    /* MOCKUP */
+    .mockup-wrap {
+      margin-top: 52px;
+      animation: levitate 5s ease-in-out infinite;
     }
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-12px); }
+    @keyframes levitate {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
     }
-    .mockup-bar { display: flex; gap: 8px; margin-bottom: 18px; }
-    .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .d1 { background: #FF5F56; } .d2 { background: #FFBD2E; } .d3 { background: #27C93F; }
-    .mockup-line { height: 9px; border-radius: 6px; background: rgba(255,255,255,0.07); margin-bottom: 9px; }
-    .mockup-line.accent { background: rgba(170,255,0,0.22); width: 60%; }
-    .mockup-line.short { width: 40%; }
-    .mockup-sig {
-      margin-top: 18px;
-      padding: 11px 16px;
-      background: rgba(170,255,0,0.1);
-      border: 1px solid rgba(170,255,0,0.28);
-      border-radius: 8px;
-      font-size: 0.78rem;
-      color: var(--accent);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .mockup {
+      background: var(--bg2);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 18px;
+      padding: 20px;
+      width: min(400px, 88vw);
+      text-align: left;
+    }
+    .m-bar { display: flex; gap: 6px; margin-bottom: 16px; }
+    .m-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .m-line { height: 8px; border-radius: 99px; background: rgba(255,255,255,0.06); margin-bottom: 8px; }
+    .m-line.hi { background: rgba(170,255,0,0.18); width: 55%; }
+    .m-line.sm { width: 38%; }
+    .m-line.md { width: 70%; }
+    .m-sig {
+      margin-top: 16px;
+      padding: 10px 14px;
+      background: rgba(170,255,0,0.08);
+      border: 1px solid rgba(170,255,0,0.2);
+      border-radius: 10px;
+      font-size: 0.75rem; font-weight: 600; color: var(--accent);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .m-sig-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); flex-shrink: 0;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%,100% { opacity: 1; } 50% { opacity: 0.3; }
     }
 
     /* DEMO MODAL */
-    #demo-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 9000;
-      background: rgba(0,0,0,0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: none;
-      align-items: center;
-      justify-content: center;
+    #modal {
+      position: fixed; inset: 0; z-index: 9500;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: none; align-items: flex-end; justify-content: center;
       padding: 20px;
     }
-    #demo-modal.open { display: flex; }
-    .demo-inner {
-      background: #111;
+    @media (min-width: 640px) { #modal { align-items: center; } }
+    #modal.on { display: flex; }
+    .modal-box {
+      background: #141414;
       border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 20px;
-      padding: 36px 32px 32px;
-      max-width: 520px;
-      width: 100%;
+      border-radius: 24px 24px 16px 16px;
+      padding: 28px 24px 24px;
+      width: 100%; max-width: 440px;
       position: relative;
-      animation: slideUp 0.35s ease;
+      animation: slide-up 0.3s cubic-bezier(.16,1,.3,1);
     }
-    @keyframes slideUp {
-      from { transform: translateY(30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
+    @media (min-width: 640px) { .modal-box { border-radius: 24px; animation: pop-in 0.28s cubic-bezier(.16,1,.3,1); } }
+    @keyframes slide-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes pop-in { from { transform: scale(0.94); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-handle {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: rgba(255,255,255,0.12);
+      margin: 0 auto 20px;
     }
-    .demo-close {
-      position: absolute;
-      top: 16px; right: 16px;
+    @media (min-width: 640px) { .modal-handle { display: none; } }
+    .modal-close {
+      position: absolute; top: 18px; right: 18px;
+      width: 30px; height: 30px; border-radius: 50%;
       background: rgba(255,255,255,0.07);
-      border: none;
-      color: var(--text);
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      font-size: 1rem;
-      cursor: pointer;
+      border: none; color: var(--muted); font-size: 1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,0.14); }
+    .modal-box h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+    .modal-box .sub { font-size: 0.8rem; color: var(--muted); margin-bottom: 24px; }
+
+    /* STEPS */
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step {
+      display: flex; align-items: center; gap: 14px;
+      padding: 13px 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .step.live { border-color: rgba(170,255,0,0.3); background: rgba(170,255,0,0.04); }
+    .step.done { opacity: 0.45; }
+    .step-n {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      border: 1.5px solid rgba(255,255,255,0.1);
       display: flex; align-items: center; justify-content: center;
-      -webkit-tap-highlight-color: transparent;
+      font-size: 0.72rem; font-weight: 800; color: var(--muted);
+      transition: all 0.3s;
     }
-    .demo-close:hover { background: rgba(255,255,255,0.14); }
-    .demo-inner h3 { font-size: 1.2rem; font-weight: 800; margin-bottom: 6px; }
-    .demo-inner p { color: var(--muted); font-size: 0.85rem; margin-bottom: 28px; }
+    .step.live .step-n { background: var(--accent); color: var(--bg); border-color: transparent; }
+    .step-body h5 { font-size: 0.85rem; font-weight: 700; margin-bottom: 2px; }
+    .step-body p { font-size: 0.74rem; color: var(--muted); }
+    .prog { margin-top: 18px; height: 2px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.45s ease; }
 
-    /* DEMO ANIMATION STEPS */
-    .demo-steps { display: flex; flex-direction: column; gap: 12px; }
-    .demo-step {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 14px 16px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 10px;
-      opacity: 0;
-      transform: translateX(-10px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-    .demo-step.active {
-      opacity: 1;
-      transform: translateX(0);
-      border-color: rgba(170,255,0,0.25);
-    }
-    .demo-step.done {
-      opacity: 0.6;
-      transform: translateX(0);
-    }
-    .step-num {
-      width: 32px; height: 32px;
-      border-radius: 50%;
-      background: rgba(170,255,0,0.1);
-      border: 1px solid rgba(170,255,0,0.25);
-      color: var(--accent);
-      font-size: 0.75rem;
-      font-weight: 800;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      transition: background 0.3s;
-    }
-    .demo-step.active .step-num {
-      background: var(--accent);
-      color: var(--bg);
-    }
-    .demo-step.done .step-num {
-      background: rgba(170,255,0,0.2);
-    }
-    .step-text h5 { font-size: 0.875rem; font-weight: 700; margin-bottom: 2px; }
-    .step-text p { font-size: 0.75rem; color: var(--muted); margin: 0; }
-    .demo-progress {
-      margin-top: 20px;
-      height: 3px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-    .demo-progress-bar {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 3px;
-      width: 0%;
-      transition: width 0.5s ease;
-    }
-
-    /* TRUSTED */
-    .trusted {
-      padding: 44px 40px;
-      text-align: center;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .trusted p { color: var(--muted); font-size: 0.8rem; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 24px; }
-    .trusted-logos { display: flex; justify-content: center; flex-wrap: wrap; gap: 36px; }
-    .trusted-logos span { color: rgba(255,255,255,0.2); font-size: 0.95rem; font-weight: 700; letter-spacing: -0.5px; }
-
-    /* STATS */
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 2px;
-      margin: 72px 40px;
-      background: rgba(255,255,255,0.05);
-      border-radius: var(--radius-card);
-      overflow: hidden;
-    }
-    @media (max-width: 768px) { .stats { grid-template-columns: 1fr; margin: 48px 16px; } }
-    .stat-item { background: var(--bg); padding: 44px 36px; text-align: center; }
-    .stat-item h3 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; color: var(--accent); margin-bottom: 8px; }
-    .stat-item p { color: var(--muted); font-size: 0.875rem; }
+    /* DIVIDER */
+    .divider-line { height: 1px; background: var(--border); margin: 0 24px; }
 
     /* SECTION */
-    section { padding: 72px 40px; }
-    @media (max-width: 768px) { section { padding: 56px 16px; } }
-    .section-label {
-      display: inline-block;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 10px;
-    }
-    .section-title {
-      font-size: clamp(1.6rem, 3.5vw, 2.6rem);
-      font-weight: 900;
-      letter-spacing: -1px;
-      margin-bottom: 14px;
-    }
-    .section-sub { color: var(--muted); font-size: 0.95rem; line-height: 1.7; max-width: 540px; }
+    section { padding: 64px 24px; }
+    @media (min-width: 768px) { section { padding: 80px 40px; } }
 
-    /* FEATURES */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-top: 44px;
+    .sec-tag {
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent);
+      display: block; margin-bottom: 10px;
     }
-    @media (max-width: 900px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 560px) { .features-grid { grid-template-columns: 1fr; } }
-    .feature-card {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.07);
-      backdrop-filter: blur(12px);
-      border-radius: var(--radius-card);
-      padding: 28px 24px;
-      transition: box-shadow 0.3s, transform 0.2s;
+    .sec-h {
+      font-size: clamp(1.6rem, 5vw, 2.4rem);
+      font-weight: 900; letter-spacing: -1px; margin-bottom: 12px;
     }
-    .feature-card:hover { box-shadow: 0 0 28px rgba(170,255,0,0.1); transform: translateY(-3px); }
-    .feature-icon { font-size: 1.8rem; margin-bottom: 14px; }
-    .feature-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
-    .feature-card p { color: var(--muted); font-size: 0.83rem; line-height: 1.6; }
+    .sec-p { color: var(--muted); font-size: 0.9rem; line-height: 1.7; max-width: 480px; }
 
-    /* SPLIT SECTION */
-    .split-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 64px;
-      align-items: center;
+    /* AI SECTION — full redesign */
+    .ai-section { background: var(--bg2); }
+    .ai-wrap {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 56px; align-items: center; max-width: 960px; margin: 0 auto;
     }
-    @media (max-width: 768px) {
-      .split-section { grid-template-columns: 1fr; gap: 36px; }
-      .split-section.reversed .split-text { order: -1; }
+    @media (max-width: 640px) { .ai-wrap { grid-template-columns: 1fr; gap: 32px; } }
+    .ai-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 18px; padding: 22px;
     }
-    .split-text .section-sub { margin-bottom: 24px; }
-
-    /* AI UI */
-    .ai-ui {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: var(--radius-card);
-      padding: 24px;
-    }
-    .ai-ui-row { display: flex; align-items: center; gap: 12px; margin-bottom: 13px; }
-    .ai-label { font-size: 0.7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; width: 88px; flex-shrink: 0; }
-    .ai-field { flex: 1; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09); position: relative; overflow: hidden; }
+    .ai-row { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
+    .ai-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); width: 70px; flex-shrink: 0; }
+    .ai-f { flex: 1; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); overflow: hidden; position: relative; }
     .ai-fill {
-      height: 100%;
-      background: rgba(170,255,0,0.13);
+      height: 100%; background: rgba(170,255,0,0.1);
       border-right: 2px solid var(--accent);
-      animation: ai-type 2.8s ease-in-out infinite;
       display: flex; align-items: center; padding: 0 10px;
-      font-size: 0.72rem; color: var(--accent); font-weight: 600;
+      font-size: 0.7rem; color: var(--accent); font-weight: 600;
+      animation: fill-in 3s ease-in-out infinite;
     }
-    @keyframes ai-type {
-      0% { width: 0; opacity: 0; }
-      20% { opacity: 1; }
-      80% { width: 85%; opacity: 1; }
-      100% { width: 85%; opacity: 0.4; }
+    .ai-fill.d1 { animation-delay: 0s; }
+    .ai-fill.d2 { animation-delay: 0.7s; }
+    .ai-fill.d3 { animation-delay: 1.4s; }
+    .ai-fill.d4 { animation-delay: 2.1s; }
+    @keyframes fill-in {
+      0%,5% { width: 0; opacity: 0; }
+      25% { opacity: 1; }
+      75% { width: 88%; opacity: 1; }
+      90%,100% { width: 88%; opacity: 0.3; }
     }
-    .ai-badge {
+    .ai-tag {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 4px 10px;
-      background: rgba(170,255,0,0.08);
-      border: 1px solid rgba(170,255,0,0.2);
-      border-radius: 999px;
-      font-size: 0.68rem; font-weight: 600; color: var(--accent);
-      margin-top: 14px;
+      background: rgba(170,255,0,0.07);
+      border: 1px solid rgba(170,255,0,0.15);
+      border-radius: 99px;
+      font-size: 0.65rem; font-weight: 700; color: var(--accent);
+      margin-top: 12px;
     }
-
-    /* COLLAB MOCKUP */
-    .collab-mockup {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: var(--radius-card);
-      padding: 24px;
-      position: relative;
-      min-height: 220px;
-    }
-    .collab-doc { min-height: 160px; position: relative; }
-    .cursor {
-      position: absolute;
-      width: 11px; height: 11px;
-      border-radius: 50% 50% 50% 0;
-      transform: rotate(-45deg);
-    }
-    .cursor-label {
-      position: absolute;
-      border-radius: 4px;
-      padding: 2px 7px;
-      font-size: 0.62rem;
-      font-weight: 700;
-      color: var(--bg);
-      white-space: nowrap;
-    }
-    .c1 { background: #FF5FA0; top: 30%; left: 20%; animation: move1 4s ease-in-out infinite; }
-    .c1l { background: #FF5FA0; top: calc(30% + 13px); left: calc(20% + 13px); animation: move1 4s ease-in-out infinite; }
-    .c2 { background: #00C6FF; top: 55%; left: 50%; animation: move2 5s ease-in-out infinite; }
-    .c2l { background: #00C6FF; top: calc(55% + 13px); left: calc(50% + 13px); animation: move2 5s ease-in-out infinite; }
-    .c3 { background: var(--accent); top: 20%; left: 65%; animation: move3 6s ease-in-out infinite; }
-    .c3l { background: var(--accent); top: calc(20% + 13px); left: calc(65% + 13px); animation: move3 6s ease-in-out infinite; color: var(--bg); }
-    @keyframes move1 { 0%,100%{transform:rotate(-45deg) translate(0,0);} 50%{transform:rotate(-45deg) translate(14px,10px);} }
-    @keyframes move2 { 0%,100%{transform:rotate(-45deg) translate(0,0);} 50%{transform:rotate(-45deg) translate(-12px,16px);} }
-    @keyframes move3 { 0%,100%{transform:rotate(-45deg) translate(0,0);} 50%{transform:rotate(-45deg) translate(10px,-12px);} }
 
     /* TEMPLATES */
-    .templates-grid {
+    .tpl-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 36px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px; margin-top: 32px;
     }
-    @media (max-width: 768px) { .templates-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px) { .templates-grid { grid-template-columns: 1fr; } }
-    .template-card {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: var(--radius-card);
-      padding: 22px;
+    .tpl-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 18px 16px;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      position: relative;
-      overflow: hidden;
+      transition: border-color 0.2s, transform 0.18s;
       -webkit-tap-highlight-color: transparent;
+      position: relative; overflow: hidden;
     }
-    .template-card:hover { transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-    .template-card:hover .use-tag { opacity: 1; transform: translateY(0); }
-    .template-icon { font-size: 1.5rem; margin-bottom: 10px; }
-    .template-card h4 { font-size: 0.875rem; font-weight: 700; margin-bottom: 3px; }
-    .template-card span { font-size: 0.72rem; color: var(--muted); }
-    .use-tag {
-      position: absolute;
-      bottom: 14px; right: 14px;
-      background: var(--accent);
-      color: var(--bg);
-      font-size: 0.68rem;
-      font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 999px;
-      opacity: 0;
-      transform: translateY(4px);
-      transition: all 0.2s;
+    .tpl-card:hover { border-color: rgba(170,255,0,0.25); transform: translateY(-2px); }
+    .tpl-card:active { transform: scale(0.97); }
+    .tpl-ico { font-size: 1.4rem; margin-bottom: 10px; }
+    .tpl-card h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 3px; line-height: 1.3; }
+    .tpl-card span { font-size: 0.68rem; color: var(--muted); }
+    .tpl-hover {
+      position: absolute; bottom: 10px; right: 10px;
+      background: var(--accent); color: var(--bg);
+      font-size: 0.6rem; font-weight: 800; padding: 3px 8px;
+      border-radius: 99px;
+      opacity: 0; transform: translateY(3px);
+      transition: all 0.18s;
     }
+    .tpl-card:hover .tpl-hover { opacity: 1; transform: none; }
 
     /* TESTIMONIALS */
-    .testimonials-grid {
+    .testi-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-top: 44px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 12px; margin-top: 32px;
     }
-    @media (max-width: 768px) { .testimonials-grid { grid-template-columns: 1fr; } }
-    .testimonial-card {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.07);
-      backdrop-filter: blur(12px);
-      border-radius: var(--radius-card);
-      padding: 26px;
+    .testi-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px;
     }
-    .testi-stars { color: var(--accent); font-size: 0.85rem; margin-bottom: 14px; }
-    .testi-quote { color: var(--text); font-size: 0.875rem; line-height: 1.65; margin-bottom: 18px; }
-    .testi-author { display: flex; align-items: center; gap: 12px; }
-    .testi-avatar {
-      width: 38px; height: 38px; border-radius: 50%;
-      background: rgba(170,255,0,0.12);
-      border: 1px solid rgba(170,255,0,0.25);
+    .stars { color: var(--accent); font-size: 0.75rem; margin-bottom: 12px; letter-spacing: 2px; }
+    .testi-q { font-size: 0.85rem; line-height: 1.65; margin-bottom: 16px; color: rgba(255,255,255,0.85); }
+    .testi-by { display: flex; align-items: center; gap: 10px; }
+    .av {
+      width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+      background: rgba(170,255,0,0.1);
+      border: 1px solid rgba(170,255,0,0.2);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 0.85rem; color: var(--accent); flex-shrink: 0;
+      font-weight: 800; font-size: 0.78rem; color: var(--accent);
     }
-    .testi-info h5 { font-size: 0.83rem; font-weight: 700; }
-    .testi-info span { font-size: 0.72rem; color: var(--muted); }
+    .testi-by h5 { font-size: 0.8rem; font-weight: 700; }
+    .testi-by span { font-size: 0.68rem; color: var(--muted); }
 
     /* PRICING */
-    .pricing-grid {
+    .price-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-      margin-top: 44px;
-      align-items: start;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px; margin-top: 32px; align-items: start;
     }
-    @media (max-width: 768px) { .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin-left: auto; margin-right: auto; } }
-    .pricing-card {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: var(--radius-card);
-      padding: 28px 24px;
+    .price-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 24px 20px;
       position: relative;
     }
-    .pricing-card.popular { border-color: var(--accent); background: rgba(170,255,0,0.03); }
-    .popular-badge {
-      position: absolute;
-      top: -13px; left: 50%; transform: translateX(-50%);
-      background: var(--accent);
-      color: var(--bg);
-      font-size: 0.7rem; font-weight: 700;
-      padding: 3px 14px;
-      border-radius: 999px;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
+    .price-card.pop { border-color: var(--accent); background: rgba(170,255,0,0.03); }
+    .pop-badge {
+      position: absolute; top: -11px; left: 50%; transform: translateX(-50%);
+      background: var(--accent); color: var(--bg);
+      font-size: 0.65rem; font-weight: 800;
+      padding: 3px 12px; border-radius: 99px; white-space: nowrap;
     }
-    .pricing-card h3 { font-size: 0.95rem; font-weight: 700; margin-bottom: 7px; }
-    .pricing-price { font-size: 2.4rem; font-weight: 900; letter-spacing: -1px; margin-bottom: 3px; }
-    .pricing-price span { font-size: 0.95rem; font-weight: 400; color: var(--muted); }
-    .pricing-sub { color: var(--muted); font-size: 0.78rem; margin-bottom: 22px; }
-    .pricing-features { list-style: none; margin-bottom: 24px; }
-    .pricing-features li {
-      font-size: 0.82rem; color: var(--muted);
-      padding: 7px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+    .price-card h3 { font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+    .price-n { font-size: 2rem; font-weight: 900; letter-spacing: -1px; }
+    .price-n sup { font-size: 1rem; font-weight: 600; vertical-align: top; margin-top: 6px; display: inline-block; }
+    .price-n sub { font-size: 0.8rem; font-weight: 400; color: var(--muted); }
+    .price-sub { font-size: 0.72rem; color: var(--muted); margin-bottom: 18px; }
+    .price-list { list-style: none; margin-bottom: 20px; }
+    .price-list li {
+      font-size: 0.78rem; color: var(--muted);
+      padding: 6px 0; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; gap: 8px;
     }
-    .pricing-features li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-    .pricing-card .btn { width: 100%; text-align: center; padding: 11px; }
-
-    /* SECURITY */
-    .security-badges {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-top: 28px;
-    }
-    .badge {
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 8px;
-      padding: 9px 18px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--muted);
-    }
+    .price-list li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .price-card .btn { width: 100%; justify-content: center; padding: 11px; font-size: 0.82rem; }
 
     /* CTA BANNER */
-    .cta-banner { background: var(--accent); padding: 72px 40px; text-align: center; }
-    .cta-banner h2 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 900; color: var(--bg); margin-bottom: 10px; letter-spacing: -1px; }
-    .cta-banner p { color: rgba(10,10,10,0.55); font-size: 0.95rem; margin-bottom: 28px; }
-    .btn-dark { background: var(--bg); color: var(--text); padding: 15px 38px; font-size: 0.95rem; }
+    .cta-strip {
+      background: var(--accent);
+      padding: 60px 24px;
+      text-align: center;
+    }
+    .cta-strip h2 { font-size: clamp(1.6rem, 5vw, 2.4rem); font-weight: 900; color: var(--bg); letter-spacing: -1px; margin-bottom: 8px; }
+    .cta-strip p { font-size: 0.85rem; color: rgba(10,10,10,0.5); margin-bottom: 24px; }
+    .btn-dark { background: var(--bg); color: var(--text); }
     .btn-dark:hover { background: #1a1a1a; }
 
     /* FOOTER */
-    footer { padding: 60px 40px 28px; border-top: 1px solid rgba(255,255,255,0.05); }
-    @media (max-width: 768px) { footer { padding: 48px 16px 24px; } }
-    .footer-grid {
+    footer {
+      padding: 48px 24px 32px;
+      border-top: 1px solid var(--border);
+    }
+    .foot-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 36px;
-      margin-bottom: 44px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px; margin-bottom: 40px;
     }
-    @media (max-width: 768px) { .footer-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 24px; } }
-    footer h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 14px; }
-    footer ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
-    footer ul a { color: var(--muted); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
+    @media (min-width: 640px) { .foot-grid { grid-template-columns: repeat(4, 1fr); } }
+    footer h4 { font-size: 0.78rem; font-weight: 700; margin-bottom: 12px; }
+    footer ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    footer ul a { color: var(--muted); text-decoration: none; font-size: 0.78rem; transition: color 0.2s; }
     footer ul a:hover { color: var(--text); }
-    .footer-newsletter { margin-top: 11px; display: flex; gap: 7px; }
-    .footer-newsletter input {
-      flex: 1; background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.09); border-radius: 8px;
-      padding: 9px 12px; color: var(--text);
-      font-family: 'Inter', sans-serif; font-size: 0.82rem; outline: none;
+    .news { margin-top: 12px; display: flex; gap: 6px; }
+    .news input {
+      flex: 1; background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; color: var(--text);
+      font-family: inherit; font-size: 0.78rem; outline: none;
     }
-    .footer-newsletter input::placeholder { color: var(--muted); }
-    .footer-newsletter button {
+    .news input::placeholder { color: var(--muted); }
+    .news button {
       background: var(--accent); color: var(--bg);
-      border: none; border-radius: 8px; padding: 9px 14px;
-      font-weight: 700; font-size: 0.78rem; cursor: pointer;
-      font-family: 'Inter', sans-serif;
+      border: none; border-radius: 8px; padding: 8px 14px;
+      font-weight: 700; font-size: 0.75rem; cursor: pointer; font-family: inherit;
     }
-    .footer-bottom {
-      display: flex; align-items: center; justify-content: space-between;
-      flex-wrap: wrap; gap: 14px;
-      padding-top: 22px;
-      border-top: 1px solid rgba(255,255,255,0.05);
+    .foot-bot {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+      padding-top: 20px; border-top: 1px solid var(--border);
     }
-    .footer-bottom p { color: var(--muted); font-size: 0.78rem; }
-    .social-links { display: flex; gap: 14px; }
-    .social-links a { color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 600; transition: color 0.2s; }
-    .social-links a:hover { color: var(--text); }
+    .foot-bot p { color: var(--muted); font-size: 0.72rem; }
+    .socials { display: flex; gap: 12px; }
+    .socials a { color: var(--muted); text-decoration: none; font-size: 0.78rem; font-weight: 600; transition: color 0.2s; }
+    .socials a:hover { color: var(--text); }
 
-    /* SCROLL REVEAL */
-    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
+    /* REVEAL */
+    .rv { opacity: 0; transform: translateY(20px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .rv.in { opacity: 1; transform: none; }
+    .rv.d1 { transition-delay: 0.08s; }
+    .rv.d2 { transition-delay: 0.16s; }
+    .rv.d3 { transition-delay: 0.24s; }
 
-    /* FLOATING APK BUTTON */
-    #apk-btn {
-      position: fixed;
-      bottom: 24px; right: 24px;
-      z-index: 9999;
-      background: var(--accent);
-      color: var(--bg);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 700;
-      padding: 12px 20px;
-      border-radius: 999px;
+    /* FLOATING APK */
+    #apk {
+      position: fixed; bottom: 20px; right: 20px; z-index: 8000;
+      background: var(--accent); color: var(--bg);
+      font-family: inherit; font-size: 0.78rem; font-weight: 800;
+      padding: 11px 18px; border-radius: var(--rb);
       text-decoration: none;
-      box-shadow: 0 4px 24px rgba(170,255,0,0.28);
-      transition: transform 0.2s, box-shadow 0.2s;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+      box-shadow: 0 4px 20px rgba(170,255,0,0.22), 0 1px 4px rgba(0,0,0,0.4);
+      transition: transform 0.18s, box-shadow 0.18s;
+      display: flex; align-items: center; gap: 6px;
     }
-    #apk-btn:hover, #apk-btn:active { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(170,255,0,0.38); }
-
-    @media (max-width: 768px) {
-      #apk-btn { bottom: 16px; right: 16px; font-size: 0.78rem; padding: 10px 16px; }
-    }
+    #apk:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(170,255,0,0.3); }
+    #apk:active { transform: scale(0.96); }
+    #apk .apk-arrow { font-size: 0.9rem; }
   </style>
 </head>
 <body>
 
-<div id="scroll-progress"></div>
-<div id="cursor-glow"></div>
+<div id="bar"></div>
 
-<!-- NAVBAR -->
-<nav id="navbar">
-  <a class="nav-logo" href="#">documento<span>.fun</span></a>
-  <ul class="nav-links">
-    <li><a href="#features">Features</a></li>
-    <li><a href="#templates">Templates</a></li>
-    <li><a href="#pricing">Pricing</a></li>
-    <li><a href="#about">About</a></li>
-  </ul>
-  <div class="nav-actions">
-    <a href="#" class="btn btn-ghost">Sign In</a>
-    <a href="./documento-fun.apk" download class="btn btn-lime">Get Started</a>
+<!-- NAV -->
+<nav id="nav">
+  <a class="nav-logo" href="#">documento<em>.fun</em></a>
+  <div class="nav-right">
+    <a href="#" class="signin">Sign In</a>
+    <a href="./documento-fun.apk" download class="cta-nav">Get App</a>
+    <button class="hbg" id="hbg" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-  <button class="hamburger" id="hamburger" aria-label="Open menu">
-    <span></span><span></span><span></span>
-  </button>
 </nav>
 
 <!-- MOBILE MENU -->
-<div id="mobile-menu" role="dialog" aria-modal="true">
-  <button class="menu-close" id="menu-close" aria-label="Close menu">&times;</button>
-  <a href="#features">Features</a>
+<div id="mnu">
+  <a href="#ai">Features</a>
   <a href="#templates">Templates</a>
   <a href="#pricing">Pricing</a>
-  <a href="#about">About</a>
+  <div class="divider"></div>
   <a href="#">Sign In</a>
-  <a href="./documento-fun.apk" download class="accent-link">Get Started Free</a>
+  <a href="./documento-fun.apk" download class="hi">Download App</a>
 </div>
 
 <!-- HERO -->
 <section class="hero">
-  <div class="hero-content">
+  <div class="hero-inner">
 
-    <!-- $MENTO BADGE -->
-    <a class="mento-badge" href="https://kickstart.easya.io/" target="_blank" rel="noopener">
-      <img src="./easya-logo.jpg" alt="EasyA Kickstart" />
-      <div class="mento-badge-text">
-        <span class="tag">Launching on</span>
-        <span class="name">$MENTO x Kickstart EasyA</span>
-      </div>
-    </a>
+    <!-- BADGES ROW: EasyA + X/Twitter -->
+    <div class="badges-row">
+      <a class="social-badge" href="https://kickstart.easya.io/" target="_blank" rel="noopener">
+        <img class="badge-icon" src="./easya-logo.jpg" alt="EasyA Kickstart" />
+        <div class="badge-txt">
+          <span class="sup">Launching on</span>
+          <span class="main">$MENTO x EasyA</span>
+        </div>
+      </a>
+      <a class="social-badge" href="https://x.com/documentofun" target="_blank" rel="noopener">
+        <div class="badge-icon x-icon">&#120143;</div>
+        <div class="badge-txt">
+          <span class="sup">Follow us</span>
+          <span class="main">@documentofun</span>
+        </div>
+      </a>
+    </div>
 
     <h1>
-      <span id="typing" class="typing-wrap">Sign Documents.</span><br />
-      Smarter. Faster.
+      <span class="typing-line" id="typing">Sign Documents.</span>
+      <span class="line2">In Seconds.</span>
     </h1>
-    <p class="hero-sub">The all-in-one document platform built for everyone. No learning curve, no limits.</p>
-    <div class="hero-ctas">
-      <a href="./documento-fun.apk" download class="btn btn-lime">Get Started Free</a>
-      <button class="btn btn-demo" id="open-demo">
-        <span class="play-icon"></span>
-        Watch Demo
+    <p class="hero-sub">The all-in-one document platform for everyone. No learning curve, no limits.</p>
+
+    <div class="cta-row">
+      <a href="./documento-fun.apk" download class="btn btn-primary">
+        <span>Get Started Free</span>
+      </a>
+      <button class="btn btn-outline btn-demo" id="open-demo">
+        <span class="play-dot"></span>
+        <span>Watch Demo</span>
       </button>
     </div>
-  </div>
-  <div class="hero-mockup">
-    <div class="mockup-bar">
-      <div class="mockup-dot d1"></div>
-      <div class="mockup-dot d2"></div>
-      <div class="mockup-dot d3"></div>
+
+    <!-- FLOATING MOCKUP -->
+    <div class="mockup-wrap rv">
+      <div class="mockup">
+        <div class="m-bar">
+          <div class="m-dot" style="background:#FF5F56"></div>
+          <div class="m-dot" style="background:#FFBD2E"></div>
+          <div class="m-dot" style="background:#27C93F"></div>
+        </div>
+        <div class="m-line hi"></div>
+        <div class="m-line md"></div>
+        <div class="m-line sm"></div>
+        <div class="m-line md"></div>
+        <div class="m-sig">
+          <div class="m-sig-dot"></div>
+          Signed by John Doe &mdash; May 25, 2025
+        </div>
+      </div>
     </div>
-    <div class="mockup-line accent"></div>
-    <div class="mockup-line"></div>
-    <div class="mockup-line short"></div>
-    <div class="mockup-line"></div>
-    <div class="mockup-line short"></div>
-    <div class="mockup-sig">&#9998; Signed by John Doe &mdash; May 25, 2025</div>
   </div>
 </section>
 
 <!-- DEMO MODAL -->
-<div id="demo-modal" role="dialog" aria-modal="true" aria-label="Product demo">
-  <div class="demo-inner">
-    <button class="demo-close" id="close-demo" aria-label="Close">&times;</button>
-    <h3>See documento.fun in Action</h3>
-    <p>Watch how AI fills, signs, and delivers your docs in seconds.</p>
-    <div class="demo-steps">
-      <div class="demo-step" id="step1">
-        <div class="step-num">1</div>
-        <div class="step-text">
-          <h5>Upload your document</h5>
-          <p>Drag and drop any PDF or Word file</p>
-        </div>
-      </div>
-      <div class="demo-step" id="step2">
-        <div class="step-num">2</div>
-        <div class="step-text">
-          <h5>AI detects all fields</h5>
-          <p>Smart recognition fills names, dates, values instantly</p>
-        </div>
-      </div>
-      <div class="demo-step" id="step3">
-        <div class="step-num">3</div>
-        <div class="step-text">
-          <h5>Sign with one tap</h5>
-          <p>Legally binding e-signature in under 3 seconds</p>
-        </div>
-      </div>
-      <div class="demo-step" id="step4">
-        <div class="step-num">4</div>
-        <div class="step-text">
-          <h5>Send &amp; done</h5>
-          <p>Recipient gets instant notification and signed copy</p>
-        </div>
-      </div>
+<div id="modal">
+  <div class="modal-box">
+    <div class="modal-handle"></div>
+    <button class="modal-close" id="close-demo">&#10005;</button>
+    <h3>See it in action</h3>
+    <p class="sub">AI-powered signing in 4 steps</p>
+    <div class="steps">
+      <div class="step" id="s1"><div class="step-n">1</div><div class="step-body"><h5>Upload document</h5><p>PDF or Word, any format</p></div></div>
+      <div class="step" id="s2"><div class="step-n">2</div><div class="step-body"><h5>AI detects fields</h5><p>Names, dates, values auto-filled</p></div></div>
+      <div class="step" id="s3"><div class="step-n">3</div><div class="step-body"><h5>Sign with one tap</h5><p>Legally binding in 3 seconds</p></div></div>
+      <div class="step" id="s4"><div class="step-n">4</div><div class="step-body"><h5>Send &amp; done</h5><p>Recipient gets instant copy</p></div></div>
     </div>
-    <div class="demo-progress">
-      <div class="demo-progress-bar" id="demo-bar"></div>
-    </div>
+    <div class="prog"><div class="prog-fill" id="prog"></div></div>
   </div>
 </div>
 
-<!-- TRUSTED BY -->
-<div class="trusted reveal">
-  <p>Trusted by teams at...</p>
-  <div class="trusted-logos">
-    <span>Accenture</span>
-    <span>Deloitte</span>
-    <span>Shopify</span>
-    <span>Notion</span>
-    <span>Vercel</span>
-    <span>Linear</span>
-  </div>
-</div>
+<div class="divider-line"></div>
 
-<!-- STATS -->
-<div class="stats">
-  <div class="stat-item reveal">
-    <h3 id="stat1">0</h3>
-    <p>Documents Signed</p>
-  </div>
-  <div class="stat-item reveal">
-    <h3 id="stat2">0</h3>
-    <p>Countries Served</p>
-  </div>
-  <div class="stat-item reveal">
-    <h3 id="stat3">0%</h3>
-    <p>Uptime Guaranteed</p>
-  </div>
-</div>
-
-<!-- FEATURES -->
-<section id="features">
-  <div class="reveal">
-    <span class="section-label">Features</span>
-    <h2 class="section-title">Everything you need, nothing you don't.</h2>
-    <p class="section-sub">Powerful tools for individuals, teams, and enterprises. Built to move fast.</p>
-  </div>
-  <div class="features-grid">
-    <div class="feature-card reveal"><div class="feature-icon">&#129302;</div><h3>AI Auto-Fill</h3><p>Smart fields detect and complete document data automatically using context-aware AI.</p></div>
-    <div class="feature-card reveal"><div class="feature-icon">&#128101;</div><h3>Real-time Collaboration</h3><p>Multiple users editing together live, with presence indicators and instant sync.</p></div>
-    <div class="feature-card reveal"><div class="feature-icon">&#9997;&#65039;</div><h3>E-Signatures</h3><p>Legally binding digital signatures in seconds. Compliant with eIDAS, ESIGN, and UETA.</p></div>
-    <div class="feature-card reveal"><div class="feature-icon">&#128230;</div><h3>Template Marketplace</h3><p>1,000+ professional templates ready to use. From NDAs to employment contracts and beyond.</p></div>
-    <div class="feature-card reveal"><div class="feature-icon">&#128196;</div><h3>PDF Tools</h3><p>Convert, compress, merge, split, and annotate PDFs without leaving the platform.</p></div>
-    <div class="feature-card reveal"><div class="feature-icon">&#128274;</div><h3>Bank-level Security</h3><p>256-bit AES encryption, SOC2 certified, GDPR compliant. Your data is untouchable.</p></div>
-  </div>
-</section>
-
-<!-- AI SHOWCASE -->
-<section>
-  <div class="split-section">
-    <div class="split-text reveal">
-      <span class="section-label">AI Powered</span>
-      <h2 class="section-title">Let AI Fill Your Documents</h2>
-      <p class="section-sub">Smart fields detect what's needed and auto-complete from your context. Less typing, fewer errors, faster turnaround.</p>
-      <a href="./documento-fun.apk" download class="btn btn-lime">Try AI Auto-Fill</a>
+<!-- AI SECTION -->
+<section class="ai-section" id="ai">
+  <div class="ai-wrap">
+    <div class="rv">
+      <span class="sec-tag">AI Powered</span>
+      <h2 class="sec-h">Let AI Fill Your Docs</h2>
+      <p class="sec-p">Smart fields detect what's needed and complete everything automatically. Less typing, zero errors.</p>
+      <br />
+      <a href="./documento-fun.apk" download class="btn btn-primary" style="margin-top:8px">Try It Free</a>
     </div>
-    <div class="ai-ui reveal">
-      <div class="ai-ui-row"><div class="ai-label">Full Name</div><div class="ai-field"><div class="ai-fill">Alexandra Thompson</div></div></div>
-      <div class="ai-ui-row"><div class="ai-label">Company</div><div class="ai-field"><div class="ai-fill" style="animation-delay:0.6s">Vercel Inc.</div></div></div>
-      <div class="ai-ui-row"><div class="ai-label">Contract</div><div class="ai-field"><div class="ai-fill" style="animation-delay:1.2s">$24,000.00</div></div></div>
-      <div class="ai-ui-row"><div class="ai-label">Eff. Date</div><div class="ai-field"><div class="ai-fill" style="animation-delay:1.8s">June 1, 2025</div></div></div>
-      <div class="ai-badge">&#10024; AI detected 4 fields automatically</div>
+    <div class="ai-card rv d1">
+      <div class="ai-row"><div class="ai-lbl">Full Name</div><div class="ai-f"><div class="ai-fill d1">Alexandra Thompson</div></div></div>
+      <div class="ai-row"><div class="ai-lbl">Company</div><div class="ai-f"><div class="ai-fill d2">Vercel Inc.</div></div></div>
+      <div class="ai-row"><div class="ai-lbl">Amount</div><div class="ai-f"><div class="ai-fill d3">$24,000.00</div></div></div>
+      <div class="ai-row"><div class="ai-lbl">Date</div><div class="ai-f"><div class="ai-fill d4">June 1, 2025</div></div></div>
+      <div class="ai-tag">&#10024; 4 fields detected automatically</div>
     </div>
   </div>
 </section>
 
-<!-- COLLAB -->
-<section>
-  <div class="split-section reversed">
-    <div class="collab-mockup reveal">
-      <div class="collab-doc">
-        <div style="height:9px;border-radius:6px;background:rgba(255,255,255,0.06);margin-bottom:9px;"></div>
-        <div style="height:9px;border-radius:6px;background:rgba(255,255,255,0.04);margin-bottom:9px;width:75%;"></div>
-        <div style="height:9px;border-radius:6px;background:rgba(255,255,255,0.06);margin-bottom:9px;width:90%;"></div>
-        <div style="height:9px;border-radius:6px;background:rgba(255,255,255,0.04);margin-bottom:9px;width:60%;"></div>
-        <div class="cursor c1"></div><div class="cursor-label c1l">Sofia</div>
-        <div class="cursor c2"></div><div class="cursor-label c2l">Marcus</div>
-        <div class="cursor c3"></div><div class="cursor-label c3l">You</div>
-      </div>
-    </div>
-    <div class="split-text reveal">
-      <span class="section-label">Collaboration</span>
-      <h2 class="section-title">Sign Together, In Real Time</h2>
-      <p class="section-sub">Invite anyone to collaborate. Watch changes appear instantly as your team edits, comments, and signs from anywhere.</p>
-      <a href="./documento-fun.apk" download class="btn btn-lime">Start Collaborating</a>
-    </div>
-  </div>
-</section>
+<div class="divider-line"></div>
 
 <!-- TEMPLATES -->
 <section id="templates">
-  <div class="reveal" style="text-align:center;">
-    <span class="section-label">Templates</span>
-    <h2 class="section-title">1,000+ Ready-to-Use Templates</h2>
-    <p class="section-sub" style="margin:0 auto;">Jump-start your workflow with professionally drafted templates for every use case.</p>
+  <div class="rv" style="max-width:960px;margin:0 auto">
+    <span class="sec-tag">Templates</span>
+    <h2 class="sec-h">1,000+ Ready to Use</h2>
+    <p class="sec-p">Professional templates for every need. Pick, customize, sign.</p>
   </div>
-  <div class="templates-grid">
-    <div class="template-card reveal"><div class="template-icon">&#128220;</div><h4>Non-Disclosure Agreement</h4><span>Legal &middot; Business</span><div class="use-tag">Use Template</div></div>
-    <div class="template-card reveal"><div class="template-icon">&#129534;</div><h4>Invoice Template</h4><span>Finance &middot; Billing</span><div class="use-tag">Use Template</div></div>
-    <div class="template-card reveal"><div class="template-icon">&#128204;</div><h4>Service Contract</h4><span>Legal &middot; Services</span><div class="use-tag">Use Template</div></div>
-    <div class="template-card reveal"><div class="template-icon">&#128188;</div><h4>Employment Agreement</h4><span>HR &middot; Legal</span><div class="use-tag">Use Template</div></div>
-    <div class="template-card reveal"><div class="template-icon">&#127968;</div><h4>Lease Agreement</h4><span>Real Estate &middot; Legal</span><div class="use-tag">Use Template</div></div>
-    <div class="template-card reveal"><div class="template-icon">&#129309;</div><h4>Partnership Agreement</h4><span>Business &middot; Legal</span><div class="use-tag">Use Template</div></div>
+  <div class="tpl-grid rv d1" style="max-width:960px;margin-left:auto;margin-right:auto">
+    <div class="tpl-card"><div class="tpl-ico">&#128220;</div><h4>Non-Disclosure</h4><span>Legal</span><div class="tpl-hover">Use</div></div>
+    <div class="tpl-card"><div class="tpl-ico">&#129534;</div><h4>Invoice</h4><span>Finance</span><div class="tpl-hover">Use</div></div>
+    <div class="tpl-card"><div class="tpl-ico">&#128204;</div><h4>Service Contract</h4><span>Legal</span><div class="tpl-hover">Use</div></div>
+    <div class="tpl-card"><div class="tpl-ico">&#128188;</div><h4>Employment</h4><span>HR</span><div class="tpl-hover">Use</div></div>
+    <div class="tpl-card"><div class="tpl-ico">&#127968;</div><h4>Lease Agreement</h4><span>Real Estate</span><div class="tpl-hover">Use</div></div>
+    <div class="tpl-card"><div class="tpl-ico">&#129309;</div><h4>Partnership</h4><span>Business</span><div class="tpl-hover">Use</div></div>
   </div>
 </section>
+
+<div class="divider-line"></div>
 
 <!-- TESTIMONIALS -->
 <section id="about">
-  <div class="reveal" style="text-align:center;">
-    <span class="section-label">Testimonials</span>
-    <h2 class="section-title">Loved by teams everywhere</h2>
+  <div class="rv" style="max-width:960px;margin:0 auto">
+    <span class="sec-tag">Reviews</span>
+    <h2 class="sec-h">What people say</h2>
   </div>
-  <div class="testimonials-grid">
-    <div class="testimonial-card reveal">
-      <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-      <p class="testi-quote">"documento.fun cut our contract turnaround from days to under an hour. The AI auto-fill alone saved us 12 hours a week."</p>
-      <div class="testi-author"><div class="testi-avatar">S</div><div class="testi-info"><h5>Sarah Mitchell</h5><span>Operations Lead, Stripe</span></div></div>
+  <div class="testi-grid rv d1" style="max-width:960px;margin-left:auto;margin-right:auto">
+    <div class="testi-card">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-q">"Cut our contract turnaround from days to under an hour. The AI auto-fill alone saved us 12 hours a week."</p>
+      <div class="testi-by"><div class="av">S</div><div><h5>Sarah Mitchell</h5><span>Operations Lead, Stripe</span></div></div>
     </div>
-    <div class="testimonial-card reveal">
-      <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-      <p class="testi-quote">"We replaced three separate tools with this one platform. Real-time signing with the whole team is a game-changer for remote work."</p>
-      <div class="testi-author"><div class="testi-avatar">J</div><div class="testi-info"><h5>James Park</h5><span>CEO, Launchpad Studio</span></div></div>
+    <div class="testi-card">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-q">"Replaced three separate tools with this one platform. Real-time signing is a total game-changer."</p>
+      <div class="testi-by"><div class="av">J</div><div><h5>James Park</h5><span>CEO, Launchpad Studio</span></div></div>
     </div>
-    <div class="testimonial-card reveal">
-      <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-      <p class="testi-quote">"The template marketplace is insane. Onboarded 50 new freelancers this quarter with zero legal headaches. Highly recommend."</p>
-      <div class="testi-author"><div class="testi-avatar">A</div><div class="testi-info"><h5>Amira Hassan</h5><span>Head of HR, Notion</span></div></div>
+    <div class="testi-card">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p class="testi-q">"Onboarded 50 freelancers this quarter with zero legal headaches. Template marketplace is insane."</p>
+      <div class="testi-by"><div class="av">A</div><div><h5>Amira Hassan</h5><span>Head of HR, Notion</span></div></div>
     </div>
   </div>
 </section>
+
+<div class="divider-line"></div>
 
 <!-- PRICING -->
 <section id="pricing">
-  <div class="reveal" style="text-align:center;">
-    <span class="section-label">Pricing</span>
-    <h2 class="section-title">Simple, transparent pricing</h2>
-    <p class="section-sub" style="margin:0 auto;">Start free. Upgrade when you need more.</p>
+  <div class="rv" style="max-width:960px;margin:0 auto;text-align:center">
+    <span class="sec-tag">Pricing</span>
+    <h2 class="sec-h">Simple pricing</h2>
+    <p class="sec-p" style="margin:0 auto">Start free. No credit card required.</p>
   </div>
-  <div class="pricing-grid">
-    <div class="pricing-card reveal">
+  <div class="price-grid rv d1" style="max-width:740px;margin-left:auto;margin-right:auto">
+    <div class="price-card">
       <h3>Free</h3>
-      <div class="pricing-price">$0<span>/mo</span></div>
-      <p class="pricing-sub">For individuals just getting started</p>
-      <ul class="pricing-features">
-        <li>5 documents per month</li><li>3 e-signatures</li><li>Basic templates</li><li>PDF export</li><li>Email support</li>
+      <div class="price-n">$0<sub>/mo</sub></div>
+      <p class="price-sub">For individuals</p>
+      <ul class="price-list">
+        <li>5 docs/month</li><li>3 e-signatures</li><li>Basic templates</li><li>PDF export</li>
       </ul>
-      <a href="./documento-fun.apk" download class="btn btn-ghost">Get Started Free</a>
+      <a href="./documento-fun.apk" download class="btn btn-outline">Get Started</a>
     </div>
-    <div class="pricing-card popular reveal">
-      <div class="popular-badge">Most Popular</div>
+    <div class="price-card pop">
+      <div class="pop-badge">Most Popular</div>
       <h3>Pro</h3>
-      <div class="pricing-price">$12<span>/mo</span></div>
-      <p class="pricing-sub">For freelancers and small teams</p>
-      <ul class="pricing-features">
-        <li>Unlimited documents</li><li>Unlimited e-signatures</li><li>Full template library</li><li>AI Auto-Fill</li><li>Real-time collaboration</li><li>Priority support</li>
+      <div class="price-n"><sup>$</sup>12<sub>/mo</sub></div>
+      <p class="price-sub">For small teams</p>
+      <ul class="price-list">
+        <li>Unlimited docs</li><li>Unlimited signatures</li><li>AI Auto-Fill</li><li>Full templates</li><li>Priority support</li>
       </ul>
-      <a href="./documento-fun.apk" download class="btn btn-lime">Start Pro Trial</a>
+      <a href="./documento-fun.apk" download class="btn btn-primary">Start Pro Trial</a>
     </div>
-    <div class="pricing-card reveal">
+    <div class="price-card">
       <h3>Business</h3>
-      <div class="pricing-price">$39<span>/mo</span></div>
-      <p class="pricing-sub">For teams that move fast</p>
-      <ul class="pricing-features">
-        <li>Everything in Pro</li><li>Custom branding</li><li>API access</li><li>Advanced analytics</li><li>SSO / SAML</li><li>Dedicated manager</li>
+      <div class="price-n"><sup>$</sup>39<sub>/mo</sub></div>
+      <p class="price-sub">For enterprises</p>
+      <ul class="price-list">
+        <li>Everything in Pro</li><li>Custom branding</li><li>API access</li><li>SSO / SAML</li>
       </ul>
-      <a href="#" class="btn btn-ghost">Contact Sales</a>
+      <a href="#" class="btn btn-outline">Contact Sales</a>
     </div>
   </div>
 </section>
 
-<!-- SECURITY -->
-<section style="text-align:center;">
-  <div class="reveal">
-    <span class="section-label">Security</span>
-    <h2 class="section-title">Built on a foundation of trust</h2>
-    <div class="security-badges">
-      <div class="badge">GDPR Compliant</div>
-      <div class="badge">SOC2 Type II</div>
-      <div class="badge">ISO 27001</div>
-      <div class="badge">256-bit Encryption</div>
-      <div class="badge">Open Source</div>
-    </div>
-  </div>
-</section>
-
-<!-- CTA BANNER -->
-<div class="cta-banner reveal">
-  <h2>Start for Free Today</h2>
+<!-- CTA STRIP -->
+<div class="cta-strip rv">
+  <h2>Start for Free</h2>
   <p>No credit card required. Cancel anytime.</p>
-  <a href="./documento-fun.apk" download class="btn btn-dark">Download App Free</a>
+  <a href="./documento-fun.apk" download class="btn btn-dark">Download App</a>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-grid">
+  <div class="foot-grid">
     <div>
       <h4>Product</h4>
-      <ul><li><a href="#">Features</a></li><li><a href="#">Pricing</a></li><li><a href="#">Changelog</a></li><li><a href="#">Roadmap</a></li><li><a href="#">API</a></li></ul>
+      <ul>
+        <li><a href="#">Features</a></li>
+        <li><a href="#">Pricing</a></li>
+        <li><a href="#">Changelog</a></li>
+        <li><a href="#">API</a></li>
+      </ul>
     </div>
     <div>
       <h4>Templates</h4>
-      <ul><li><a href="#">NDA</a></li><li><a href="#">Invoice</a></li><li><a href="#">Contract</a></li><li><a href="#">Employment</a></li><li><a href="#">Lease</a></li></ul>
+      <ul>
+        <li><a href="#">NDA</a></li>
+        <li><a href="#">Invoice</a></li>
+        <li><a href="#">Contract</a></li>
+        <li><a href="#">Lease</a></li>
+      </ul>
     </div>
     <div>
       <h4>Company</h4>
-      <ul><li><a href="#">About</a></li><li><a href="#">Blog</a></li><li><a href="#">Careers</a></li><li><a href="#">Press</a></li><li><a href="#">Contact</a></li></ul>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
     </div>
     <div>
-      <h4>Legal</h4>
-      <ul><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li><li><a href="#">Cookies</a></li><li><a href="#">GDPR</a></li></ul>
-      <div style="margin-top:18px;">
-        <p style="color:var(--muted);font-size:0.72rem;margin-bottom:8px;">Newsletter</p>
-        <div class="footer-newsletter">
-          <input type="email" placeholder="you@company.com" />
-          <button>Go</button>
-        </div>
+      <h4>Stay updated</h4>
+      <div class="news">
+        <input type="email" placeholder="your@email.com" />
+        <button>Go</button>
       </div>
     </div>
   </div>
-  <div class="footer-bottom">
-    <p>&copy; 2025 documento.fun. All rights reserved.</p>
-    <div class="social-links">
-      <a href="#">Twitter/X</a>
-      <a href="#">GitHub</a>
-      <a href="#">LinkedIn</a>
+  <div class="foot-bot">
+    <p>&copy; 2025 documento.fun</p>
+    <div class="socials">
+      <a href="https://x.com/documentofun" target="_blank">X / Twitter</a>
+      <a href="https://github.com/synterlab/documento-fun" target="_blank">GitHub</a>
     </div>
   </div>
 </footer>
 
-<!-- FLOATING APK BUTTON -->
-<a id="apk-btn" href="./documento-fun.apk" download>&#8595; Download App (APK)</a>
+<!-- FLOATING APK -->
+<a id="apk" href="./documento-fun.apk" download>
+  <span class="apk-arrow">&#8595;</span> Download APK
+</a>
 
 <script>
-  // CURSOR GLOW — desktop only
-  const glow = document.getElementById('cursor-glow');
-  if (window.matchMedia('(hover: hover)').matches) {
-    document.addEventListener('mousemove', e => {
-      glow.style.left = e.clientX + 'px';
-      glow.style.top = e.clientY + 'px';
-    });
-  }
-
-  // SCROLL PROGRESS + NAVBAR
+  // SCROLL BAR + NAV
   window.addEventListener('scroll', () => {
-    const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-    document.getElementById('scroll-progress').style.width = pct + '%';
-    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+    const p = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+    document.getElementById('bar').style.width = (p * 100) + '%';
+    document.getElementById('nav').classList.toggle('stuck', window.scrollY > 30);
   }, { passive: true });
 
-  // TYPING ANIMATION
-  const phrases = ['Sign Documents.', 'Collaborate Live.', 'Automate with AI.', 'Done in Seconds.'];
-  let idx = 0;
-  const typingEl = document.getElementById('typing');
+  // TYPING
+  const words = ['Sign Documents.', 'Collaborate Live.', 'AI Auto-Fill.', 'Done in Seconds.'];
+  let wi = 0;
+  const tel = document.getElementById('typing');
   setInterval(() => {
-    typingEl.classList.add('fade');
+    tel.classList.add('fade');
     setTimeout(() => {
-      idx = (idx + 1) % phrases.length;
-      typingEl.textContent = phrases[idx];
-      typingEl.classList.remove('fade');
-    }, 350);
-  }, 2500);
+      wi = (wi + 1) % words.length;
+      tel.textContent = words[wi];
+      tel.style.opacity = '1';
+      tel.classList.remove('fade');
+    }, 300);
+  }, 2600);
 
   // MOBILE MENU
-  const hamburger = document.getElementById('hamburger');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const menuClose = document.getElementById('menu-close');
-
-  function openMenu() {
-    mobileMenu.classList.add('open');
-    hamburger.classList.add('open');
-    document.body.style.overflow = 'hidden';
+  const hbg = document.getElementById('hbg');
+  const mnu = document.getElementById('mnu');
+  let menuOpen = false;
+  function toggleMenu(force) {
+    menuOpen = typeof force === 'boolean' ? force : !menuOpen;
+    hbg.classList.toggle('x', menuOpen);
+    mnu.classList.toggle('on', menuOpen);
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
   }
-  function closeMenu() {
-    mobileMenu.classList.remove('open');
-    hamburger.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  hamburger.addEventListener('click', openMenu);
-  hamburger.addEventListener('touchend', function(e) { e.preventDefault(); openMenu(); });
-  menuClose.addEventListener('click', closeMenu);
-  menuClose.addEventListener('touchend', function(e) { e.preventDefault(); closeMenu(); });
-
-  // Close menu when tapping a link
-  mobileMenu.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', closeMenu);
-    a.addEventListener('touchend', function(e) { setTimeout(closeMenu, 100); });
+  hbg.addEventListener('click', () => toggleMenu());
+  mnu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => setTimeout(() => toggleMenu(false), 80));
   });
 
-  // SCROLL REVEAL
-  const revealEls = document.querySelectorAll('.reveal');
-  const revealObserver = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-  }, { threshold: 0.1 });
-  revealEls.forEach(el => revealObserver.observe(el));
+  // REVEAL ON SCROLL
+  const rvEls = document.querySelectorAll('.rv');
+  const ro = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }), { threshold: 0.1 });
+  rvEls.forEach(el => ro.observe(el));
 
-  // STATS COUNTER
-  function animateCounter(el, target, suffix, duration) {
-    let start = 0;
-    const step = target / (duration / 16);
-    const timer = setInterval(() => {
-      start += step;
-      if (start >= target) { start = target; clearInterval(timer); }
-      el.textContent = (suffix === '%' ? start.toFixed(1) : Math.floor(start).toLocaleString()) + suffix;
-    }, 16);
+  // DEMO MODAL + STEPS
+  const modal = document.getElementById('modal');
+  const stepIds = ['s1','s2','s3','s4'];
+  let demoT = null;
+
+  function resetSteps() {
+    stepIds.forEach(id => document.getElementById(id).classList.remove('live','done'));
+    document.getElementById('prog').style.width = '0%';
   }
-  let statsAnimated = false;
-  const statsEl = document.querySelector('.stats');
-  new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting && !statsAnimated) {
-      statsAnimated = true;
-      animateCounter(document.getElementById('stat1'), 2000000, '+', 2000);
-      animateCounter(document.getElementById('stat2'), 180, '+', 1500);
-      animateCounter(document.getElementById('stat3'), 99.9, '%', 1800);
+  function runDemo() {
+    resetSteps();
+    let i = 0;
+    function next() {
+      if (i > 0) document.getElementById(stepIds[i-1]).classList.add('done');
+      if (i < stepIds.length) {
+        document.getElementById(stepIds[i]).classList.add('live');
+        document.getElementById('prog').style.width = ((i+1)/stepIds.length*100) + '%';
+        i++;
+        demoT = setTimeout(next, 1100);
+      } else {
+        demoT = setTimeout(() => { resetSteps(); i = 0; demoT = setTimeout(next, 400); }, 1200);
+      }
     }
-  }, { threshold: 0.3 }).observe(statsEl);
+    next();
+  }
+
+  document.getElementById('open-demo').addEventListener('click', () => {
+    modal.classList.add('on');
+    runDemo();
+  });
+  function closeModal() {
+    modal.classList.remove('on');
+    clearTimeout(demoT);
+    resetSteps();
+  }
+  document.getElementById('close-demo').addEventListener('click', closeModal);
+  modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
   // SMOOTH SCROLL
   document.querySelectorAll('a[href^="#"]').forEach(a => {
@@ -1242,53 +910,6 @@
       const t = document.querySelector(a.getAttribute('href'));
       if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth' }); }
     });
-  });
-
-  // DEMO MODAL + ANIMATION
-  const demoModal = document.getElementById('demo-modal');
-  const steps = ['step1','step2','step3','step4'];
-  let demoTimer = null;
-
-  function runDemoAnimation() {
-    const bar = document.getElementById('demo-bar');
-    steps.forEach(id => {
-      const s = document.getElementById(id);
-      s.classList.remove('active', 'done');
-    });
-    bar.style.width = '0%';
-    let i = 0;
-    function activateStep() {
-      if (i > 0) document.getElementById(steps[i-1]).classList.add('done');
-      if (i < steps.length) {
-        document.getElementById(steps[i]).classList.add('active');
-        bar.style.width = ((i + 1) / steps.length * 100) + '%';
-        i++;
-        demoTimer = setTimeout(activateStep, 1200);
-      } else {
-        demoTimer = setTimeout(() => {
-          steps.forEach(id => document.getElementById(id).classList.remove('active','done'));
-          bar.style.width = '0%';
-          i = 0;
-          demoTimer = setTimeout(activateStep, 600);
-        }, 1400);
-      }
-    }
-    activateStep();
-  }
-
-  document.getElementById('open-demo').addEventListener('click', () => {
-    demoModal.classList.add('open');
-    runDemoAnimation();
-  });
-  document.getElementById('close-demo').addEventListener('click', () => {
-    demoModal.classList.remove('open');
-    clearTimeout(demoTimer);
-  });
-  demoModal.addEventListener('click', e => {
-    if (e.target === demoModal) {
-      demoModal.classList.remove('open');
-      clearTimeout(demoTimer);
-    }
   });
 </script>
 </body>
