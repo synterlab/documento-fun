@@ -134,65 +134,70 @@
     /* SOCIAL BADGES ROW */
     .badges-row {
       display: flex; gap: 8px; justify-content: center;
-      flex-wrap: wrap; margin-bottom: 32px;
+      flex-wrap: nowrap; margin-bottom: 36px;
     }
     .social-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 6px 14px 6px 8px;
+      display: inline-flex; align-items: center; gap: 9px;
+      padding: 7px 14px 7px 7px;
       background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
+      border: 1px solid rgba(255,255,255,0.1);
       border-radius: var(--rb);
       text-decoration: none;
       transition: border-color 0.22s, background 0.22s, transform 0.15s;
-      cursor: pointer;
     }
-    .social-badge:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
+    .social-badge:hover { border-color: rgba(255,255,255,0.22); background: rgba(255,255,255,0.07); }
     .social-badge:active { transform: scale(0.97); }
     .badge-icon {
-      width: 26px; height: 26px; border-radius: 7px;
-      object-fit: cover; flex-shrink: 0;
+      width: 30px; height: 30px; border-radius: 8px;
+      object-fit: cover; object-position: center;
+      flex-shrink: 0; display: block;
     }
     .badge-icon.x-icon {
-      background: #000;
+      background: #fff;
       display: flex; align-items: center; justify-content: center;
-      font-size: 14px; font-weight: 900; color: #fff;
-      font-family: sans-serif;
+      font-size: 15px; font-weight: 900; color: #000;
+      font-family: 'Inter', sans-serif; letter-spacing: -1px;
     }
     .badge-txt { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
-    .badge-txt .sup { font-size: 0.58rem; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--accent); }
-    .badge-txt .main { font-size: 0.75rem; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .badge-txt .sup { font-size: 0.56rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); line-height: 1; }
+    .badge-txt .main { font-size: 0.72rem; font-weight: 700; color: var(--text); white-space: nowrap; line-height: 1.3; }
 
     /* HERO HEADLINE */
     .hero h1 {
-      font-size: clamp(2.6rem, 11vw, 5rem);
+      font-size: clamp(2.8rem, 12vw, 5.2rem);
       font-weight: 900; letter-spacing: -2.5px; line-height: 1.05;
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
-    .hero h1 .line2 { color: var(--accent); display: block; }
-    .typing-line { min-height: 1.1em; }
-    .typing-line.fade { opacity: 0; transition: opacity 0.3s; }
+    .typing-line {
+      display: block;
+      min-height: 1.05em;
+      transition: opacity 0.28s ease;
+    }
+    .typing-line.fade { opacity: 0; }
+    .hero-accent { color: var(--accent); display: block; }
 
     .hero-sub {
-      font-size: clamp(0.9rem, 3.5vw, 1.05rem);
-      color: var(--muted); line-height: 1.7;
-      max-width: 400px; margin: 0 auto 36px;
+      font-size: clamp(0.88rem, 3vw, 1rem);
+      color: var(--muted); line-height: 1.65;
+      max-width: 340px; margin: 0 auto 32px;
     }
 
     /* CTA BUTTONS */
     .cta-row {
       display: flex; gap: 10px; justify-content: center;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
     }
     .btn {
       display: inline-flex; align-items: center; gap: 8px;
-      padding: 14px 26px;
+      padding: 13px 22px;
       border-radius: var(--rb);
-      font-family: inherit; font-size: 0.92rem; font-weight: 700;
+      font-family: inherit; font-size: 0.875rem; font-weight: 700;
       text-decoration: none; border: none; cursor: pointer;
       transition: opacity 0.18s, transform 0.15s, box-shadow 0.18s;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
       white-space: nowrap;
+      flex-shrink: 0;
     }
     .btn:active { transform: scale(0.96); }
 
@@ -604,7 +609,7 @@
 
     <h1>
       <span class="typing-line" id="typing">Sign Documents.</span>
-      <span class="line2">In Seconds.</span>
+      <span class="hero-accent">Done in seconds.</span>
     </h1>
     <p class="hero-sub">The all-in-one document platform for everyone. No learning curve, no limits.</p>
 
@@ -632,7 +637,7 @@
         <div class="m-line md"></div>
         <div class="m-sig">
           <div class="m-sig-dot"></div>
-          Signed by John Doe &mdash; May 25, 2025
+          Signed by John Doe &mdash; May 25, 2026
         </div>
       </div>
     </div>
@@ -672,7 +677,7 @@
       <div class="ai-row"><div class="ai-lbl">Full Name</div><div class="ai-f"><div class="ai-fill d1">Alexandra Thompson</div></div></div>
       <div class="ai-row"><div class="ai-lbl">Company</div><div class="ai-f"><div class="ai-fill d2">Vercel Inc.</div></div></div>
       <div class="ai-row"><div class="ai-lbl">Amount</div><div class="ai-f"><div class="ai-fill d3">$24,000.00</div></div></div>
-      <div class="ai-row"><div class="ai-lbl">Date</div><div class="ai-f"><div class="ai-fill d4">June 1, 2025</div></div></div>
+      <div class="ai-row"><div class="ai-lbl">Date</div><div class="ai-f"><div class="ai-fill d4">June 1, 2026</div></div></div>
       <div class="ai-tag">&#10024; 4 fields detected automatically</div>
     </div>
   </div>
@@ -811,7 +816,7 @@
     </div>
   </div>
   <div class="foot-bot">
-    <p>&copy; 2025 documento.fun</p>
+    <p>&copy; 2026 documento.fun</p>
     <div class="socials">
       <a href="https://x.com/documentofun" target="_blank">X / Twitter</a>
       <a href="https://github.com/synterlab/documento-fun" target="_blank">GitHub</a>
@@ -833,7 +838,7 @@
   }, { passive: true });
 
   // TYPING
-  const words = ['Sign Documents.', 'Collaborate Live.', 'AI Auto-Fill.', 'Done in Seconds.'];
+  const words = ['Sign Documents.', 'Collaborate Live.', 'Automate with AI.', 'Ship Contracts.'];
   let wi = 0;
   const tel = document.getElementById('typing');
   setInterval(() => {
