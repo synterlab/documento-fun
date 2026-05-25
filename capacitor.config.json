@@ -1,0 +1,12 @@
+{
+  "appId": "fun.documento.app",
+  "appName": "Documento",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "backgroundColor": "#0A0A0A"
+  }
+}
